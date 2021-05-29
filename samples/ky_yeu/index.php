@@ -23,8 +23,8 @@
 
     
     // print_r($files2);
-    print_r($files1);
-    sort($file1, SORT_NATURAL | SORT_FLAG_CASE);
+    // print_r($files1);
+    // sort($file1, SORT_NATURAL | SORT_FLAG_CASE);
     ?>
 
 
@@ -81,7 +81,7 @@
 
             $('.flipbook').turn({
                 // Elevation
-
+              
                 elevation: 50,
 
                 // Enable gradients
