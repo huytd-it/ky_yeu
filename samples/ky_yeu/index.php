@@ -11,20 +11,32 @@
     <meta name="viewport" content="width = 1050, user-scalable = no" />
     <script type="text/javascript" src="../../extras/jquery.min.1.7.js"></script>
     <script type="text/javascript" src="../../extras/modernizr.2.5.3.min.js"></script>
-    <script type="text/javascript" src="../../extras/jquery.min.1.7.js"></script>
+    <script type="text/javascript" src="../../extras/jquery-ui-1.8.20.custom.min.js"></script>
     <script type="text/javascript" src="../../lib/hash.js"></script>
+    <style>
+        body {
+            background-color: gainsboro;
+        }
+
+        .flipbook-viewport .double {
+            overflow-y: auto;
+            width: 960px !important;
+            height: 600px !important;
+        }
+
+        .flipbook-viewport .flipbook {
+            top: -300px !important;
+            left: -475px !important;
+        }
+    </style>
 </head>
 
 <body>
     <?php
     $dir    = 'pages';
     $files1 = scandir($dir);
-
-
-    
-    // print_r($files2);
-    // print_r($files1);
-    // sort($file1, SORT_NATURAL | SORT_FLAG_CASE);
+    sort($files1, SORT_NATURAL | SORT_FLAG_CASE);
+ 
     ?>
 
 
@@ -40,6 +52,7 @@
                 <div ignore="1" class="previous-button"></div>
             </div>
         </div>
+     
     </div>
     <div class="flipbook-viewport">
         <div class="container">
@@ -47,19 +60,21 @@
                 <?php foreach ($files1 as $key => $file) {
 
                     if ($key >  1) {
-                        if($key == 2) {
+                        if ($key == 2) {
 
-
-                ?><div class="page" style="background-image:url('<?php echo $dir . '/' . $file ?>')"></div>
-                <?php }else  ?>
-                        <div class="double" style="background-image:url('<?php echo $dir . '/' . $file ?>')"></div>
-
-                <?php 
+                            echo '<div class="page" style="background-image:url(' . $dir . '/' . $file . ')"></div>';
+                        } else
+                            echo '<div class="double" style="background-image:url(' . $dir . '/' . $file . ')"></div>';
                     }
-
                 } ?>
             </div>
         </div>
+        <div class="bottom">
+            <div id="slider-bar" class="turnjs-slider">
+                <div id="slider"></div>
+            </div>
+        </div>
+      
     </div>
 
 
@@ -67,43 +82,74 @@
         function loadApp() {
 
             var flipbook = $('.flipbook');
-
-            // Check if the CSS was already loaded
-
             if (flipbook.width() == 0 || flipbook.height() == 0) {
                 setTimeout(loadApp, 10);
                 return;
             }
-
             $('.flipbook .double').scissor();
-
-            // Create the flipbook
-
             $('.flipbook').turn({
                 // Elevation
-              
+                width: 960,
+                height: 600,
                 elevation: 50,
-
-                // Enable gradients
-
                 gradients: true,
-
-                // Auto center this flipbook
-
-                autoCenter: true
-
+                duration: 1000,
+                autoCenter: true,
             });
+            Hash.on('^page\/([0-9]*)$', {
+                yep: function(path, parts) {
+                    var page = parts[1];
+
+                    if (page !== undefined) {
+                        if ($('.flipbook').turn('is'))
+                            $('.flipbook').turn('page', page);
+                    }
+
+                },
+                nop: function(path) {
+
+                    if ($('.flipbook').turn('is'))
+                        $('.flipbook').turn('page', 1);
+                }
+            });
+            // Load the HTML4 version if there's not CSS transform
+            $("#slider").slider({
+                min: 1,
+                max: numberOfViews(flipbook),
+
+                start: function(event, ui) {
+
+                    if (!window._thumbPreview) {
+                        _thumbPreview = $('<div />', {
+                            'class': 'thumbnail'
+                        }).html('<div></div>');
+                        setPreview(ui.value);
+                        _thumbPreview.appendTo($(ui.handle));
+                    } else
+                        setPreview(ui.value);
+
+                    moveBar(false);
+
+                },
+
+                slide: function(event, ui) {
+
+                    setPreview(ui.value);
+
+                },
+
+                stop: function() {
+
+                    if (window._thumbPreview)
+                        _thumbPreview.removeClass('show');
+
+                    $('.flipbook').turn('page', Math.max(1, $(this).slider('value') * 2 - 2));
+
+                }
+            });
+
+
         }
-
-        // Load the HTML4 version if there's not CSS transform
-
-        yepnope({
-            test: Modernizr.csstransforms,
-            yep: ['../../lib/turn.min.js'],
-            nope: ['../../lib/turn.html4.min.js'],
-            both: ['../../lib/scissor.min.js', 'css/double-page.css'],
-            complete: loadApp
-        });
         $(document).keydown(function(e) {
 
             var previous = 37,
@@ -127,11 +173,18 @@
                     break;
                 case esc:
 
-                    $('.magazine-viewport').zoom('zoomOut');
+                    $('.flipbook-viewport').zoom('zoomOut');
                     e.preventDefault();
 
                     break;
             }
+        });
+        yepnope({
+            test: Modernizr.csstransforms,
+            yep: ['../../lib/turn.min.js'],
+            nope: ['../../lib/turn.html4.min.js', 'css/jquery.ui.html4.css'],
+            both: ['../../lib/zoom.min.js', '../../lib/scissor.min.js', 'css/double-page.css', 'css/jquery.ui.css','js/magazine.js','css/magazine.css'],
+            complete: loadApp
         });
     </script>
 
