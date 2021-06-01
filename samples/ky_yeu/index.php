@@ -20,7 +20,7 @@
         }
 
         .flipbook-viewport .double {
-          
+
             width: 960px !important;
             height: 600px !important;
         }
@@ -59,13 +59,17 @@
     <div class="flipbook-viewport">
         <div class="container">
             <div class="flipbook">
-                <?php foreach ($files1 as $key => $file) {
+
+                <?php 
+                
+                 foreach ($files1 as $key => $file) {
                     $page = $dir . '/' . $file;
                     if ($key >  1) {
-                        if ($key == 2) {
-                          
+                       
+                        if ($key == 2 || $key == count($files1) - 1) {
+
                             echo "<div class='page' ><img style='width:100%; height:100%' src='$page'></div>";
-                        } else {
+                        } else{
 
                             echo "<div class='double'><img style='width:100%; height:100%' src='$page'></div>";
                         }
@@ -154,6 +158,17 @@
 
 
         }
+        // if ($.isTouch)
+        //     $('.flipbook-viewport').bind('zoom.doubleTap', zoomTo);
+        // else
+        //     $('.flipbook-viewport').bind('zoom.tap', zoomTo);
+
+        // if ($.isTouch) {
+        //     $('.flipbook').bind('touchstart', regionClick);
+        // } else {
+        //     $('.flipbook').click(regionClick);
+        // }
+
         $(document).keydown(function(e) {
 
             var previous = 37,
@@ -183,6 +198,32 @@
                     break;
             }
         });
+
+        $('.zoom-icon').bind('mouseover', function() {
+
+            if ($(this).hasClass('zoom-icon-in'))
+                $(this).addClass('zoom-icon-in-hover');
+
+            if ($(this).hasClass('zoom-icon-out'))
+                $(this).addClass('zoom-icon-out-hover');
+
+        }).bind('mouseout', function() {
+
+            if ($(this).hasClass('zoom-icon-in'))
+                $(this).removeClass('zoom-icon-in-hover');
+
+            if ($(this).hasClass('zoom-icon-out'))
+                $(this).removeClass('zoom-icon-out-hover');
+
+        }).bind('click', function() {
+
+            if ($(this).hasClass('zoom-icon-in'))
+                $('.magazine-viewport').zoom('zoomIn');
+            else if ($(this).hasClass('zoom-icon-out'))
+                $('.magazine-viewport').zoom('zoomOut');
+
+        });
+
         yepnope({
             test: Modernizr.csstransforms,
             yep: ['../../lib/turn.min.js'],
