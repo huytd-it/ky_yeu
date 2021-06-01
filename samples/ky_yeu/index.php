@@ -8,6 +8,7 @@
 <!--<![endif]-->
 
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width = 1050, user-scalable = no" />
     <script type="text/javascript" src="../../extras/jquery.min.1.7.js"></script>
     <script type="text/javascript" src="../../extras/modernizr.2.5.3.min.js"></script>
@@ -19,7 +20,7 @@
         }
 
         .flipbook-viewport .double {
-            overflow-y: auto;
+          
             width: 960px !important;
             height: 600px !important;
         }
@@ -36,7 +37,8 @@
     $dir    = 'pages';
     $files1 = scandir($dir);
     sort($files1, SORT_NATURAL | SORT_FLAG_CASE);
- 
+
+
     ?>
 
 
@@ -52,19 +54,21 @@
                 <div ignore="1" class="previous-button"></div>
             </div>
         </div>
-     
+
     </div>
     <div class="flipbook-viewport">
         <div class="container">
             <div class="flipbook">
                 <?php foreach ($files1 as $key => $file) {
-
+                    $page = $dir . '/' . $file;
                     if ($key >  1) {
                         if ($key == 2) {
+                          
+                            echo "<div class='page' ><img style='width:100%; height:100%' src='$page'></div>";
+                        } else {
 
-                            echo '<div class="page" style="background-image:url(' . $dir . '/' . $file . ')"></div>';
-                        } else
-                            echo '<div class="double" style="background-image:url(' . $dir . '/' . $file . ')"></div>';
+                            echo "<div class='double'><img style='width:100%; height:100%' src='$page'></div>";
+                        }
                     }
                 } ?>
             </div>
@@ -74,7 +78,7 @@
                 <div id="slider"></div>
             </div>
         </div>
-      
+
     </div>
 
 
@@ -183,7 +187,7 @@
             test: Modernizr.csstransforms,
             yep: ['../../lib/turn.min.js'],
             nope: ['../../lib/turn.html4.min.js', 'css/jquery.ui.html4.css'],
-            both: ['../../lib/zoom.min.js', '../../lib/scissor.min.js', 'css/double-page.css', 'css/jquery.ui.css','js/magazine.js','css/magazine.css'],
+            both: ['../../lib/zoom.min.js', '../../lib/scissor.min.js', 'css/double-page.css', 'css/jquery.ui.css', 'js/magazine.js', 'css/magazine.css'],
             complete: loadApp
         });
     </script>
