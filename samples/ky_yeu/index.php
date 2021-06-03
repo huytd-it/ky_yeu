@@ -60,16 +60,16 @@
         <div class="container">
             <div class="flipbook">
 
-                <?php 
-                
-                 foreach ($files1 as $key => $file) {
+                <?php
+
+                foreach ($files1 as $key => $file) {
                     $page = $dir . '/' . $file;
                     if ($key >  1) {
-                       
+
                         if ($key == 2 || $key == count($files1) - 1) {
 
                             echo "<div class='page' ><img style='width:100%; height:100%' src='$page'></div>";
-                        } else{
+                        } else {
 
                             echo "<div class='double'><img style='width:100%; height:100%' src='$page'></div>";
                         }
@@ -96,141 +96,169 @@
             }
             $('.flipbook .double').scissor();
             $('.flipbook').turn({
-                // Elevation
-                width: 960,
-                height: 600,
-                elevation: 50,
-                gradients: true,
-                duration: 1000,
-                autoCenter: true,
-            });
-            Hash.on('^page\/([0-9]*)$', {
-                yep: function(path, parts) {
-                    var page = parts[1];
+                    // Elevation
+                    width: 960,
+                    height: 600,
+                    elevation: 50,
+                    gradients: true,
+                    duration: 1000,
+                    autoCenter: true,
+                    when: {
+                        turning: function(event, page, view) {
 
-                    if (page !== undefined) {
-                        if ($('.flipbook').turn('is'))
-                            $('.flipbook').turn('page', page);
+                            var book = $(this),
+                                currentPage = book.turn('page'),
+                                pages = book.turn('pages');
+
+                            // Update the current URI
+
+                            Hash.go('page/' + page).update();
+
+                            // Show and hide navigation buttons
+
+                            disableControls(page);
+
+
+                            $('.thumbnails .page-' + currentPage).
+                            parent().
+                            removeClass('current');
+
+                            $('.thumbnails .page-' + page).
+                            parent().
+                            addClass('current');
+
+
+
+                        },
                     }
 
-                },
-                nop: function(path) {
+                    }); Hash.on('^page\/([0-9]*)$', {
+                    yep: function(path, parts) {
+                        var page = parts[1];
 
-                    if ($('.flipbook').turn('is'))
-                        $('.flipbook').turn('page', 1);
-                }
-            });
-            // Load the HTML4 version if there's not CSS transform
-            $("#slider").slider({
-                min: 1,
-                max: numberOfViews(flipbook),
+                        if (page !== undefined) {
+                            if ($('.flipbook').turn('is'))
+                                $('.flipbook').turn('page', page);
+                        }
 
-                start: function(event, ui) {
+                    },
+                    nop: function(path) {
 
-                    if (!window._thumbPreview) {
-                        _thumbPreview = $('<div />', {
-                            'class': 'thumbnail'
-                        }).html('<div></div>');
+                        if ($('.flipbook').turn('is'))
+                            $('.flipbook').turn('page', 1);
+                    }
+                });
+                // Load the HTML4 version if there's not CSS transform
+                $("#slider").slider({
+                    min: 1,
+                    max: numberOfViews(flipbook),
+
+                    start: function(event, ui) {
+
+                        if (!window._thumbPreview) {
+                            _thumbPreview = $('<div />', {
+                                'class': 'thumbnail'
+                            }).html('<div></div>');
+                            setPreview(ui.value);
+                            _thumbPreview.appendTo($(ui.handle));
+                        } else
+                            setPreview(ui.value);
+
+                        moveBar(false);
+
+                    },
+
+                    slide: function(event, ui) {
+
                         setPreview(ui.value);
-                        _thumbPreview.appendTo($(ui.handle));
-                    } else
-                        setPreview(ui.value);
 
-                    moveBar(false);
+                    },
 
-                },
+                    stop: function() {
 
-                slide: function(event, ui) {
+                        if (window._thumbPreview)
+                            _thumbPreview.removeClass('show');
 
-                    setPreview(ui.value);
+                        $('.flipbook').turn('page', Math.max(1, $(this).slider('value') * 2 - 2));
 
-                },
-
-                stop: function() {
-
-                    if (window._thumbPreview)
-                        _thumbPreview.removeClass('show');
-
-                    $('.flipbook').turn('page', Math.max(1, $(this).slider('value') * 2 - 2));
-
-                }
-            });
+                    }
+                });
 
 
-        }
-        // if ($.isTouch)
-        //     $('.flipbook-viewport').bind('zoom.doubleTap', zoomTo);
-        // else
-        //     $('.flipbook-viewport').bind('zoom.tap', zoomTo);
-
-        // if ($.isTouch) {
-        //     $('.flipbook').bind('touchstart', regionClick);
-        // } else {
-        //     $('.flipbook').click(regionClick);
-        // }
-
-        $(document).keydown(function(e) {
-
-            var previous = 37,
-                next = 39,
-                esc = 27;
-
-            switch (e.keyCode) {
-                case previous:
-
-                    // left arrow
-                    $('.flipbook').turn('previous');
-                    e.preventDefault();
-
-                    break;
-                case next:
-
-                    //right arrow
-                    $('.flipbook').turn('next');
-                    e.preventDefault();
-
-                    break;
-                case esc:
-
-                    $('.flipbook-viewport').zoom('zoomOut');
-                    e.preventDefault();
-
-                    break;
             }
-        });
+            // if ($.isTouch)
+            //     $('.flipbook-viewport').bind('zoom.doubleTap', zoomTo);
+            // else
+            //     $('.flipbook-viewport').bind('zoom.tap', zoomTo);
 
-        $('.zoom-icon').bind('mouseover', function() {
+            // if ($.isTouch) {
+            //     $('.flipbook').bind('touchstart', regionClick);
+            // } else {
+            //     $('.flipbook').click(regionClick);
+            // }
 
-            if ($(this).hasClass('zoom-icon-in'))
-                $(this).addClass('zoom-icon-in-hover');
+            $(document).keydown(function(e) {
 
-            if ($(this).hasClass('zoom-icon-out'))
-                $(this).addClass('zoom-icon-out-hover');
+                var previous = 37,
+                    next = 39,
+                    esc = 27;
 
-        }).bind('mouseout', function() {
+                switch (e.keyCode) {
+                    case previous:
 
-            if ($(this).hasClass('zoom-icon-in'))
-                $(this).removeClass('zoom-icon-in-hover');
+                        // left arrow
+                        $('.flipbook').turn('previous');
+                        e.preventDefault();
 
-            if ($(this).hasClass('zoom-icon-out'))
-                $(this).removeClass('zoom-icon-out-hover');
+                        break;
+                    case next:
 
-        }).bind('click', function() {
+                        //right arrow
+                        $('.flipbook').turn('next');
+                        e.preventDefault();
 
-            if ($(this).hasClass('zoom-icon-in'))
-                $('.magazine-viewport').zoom('zoomIn');
-            else if ($(this).hasClass('zoom-icon-out'))
-                $('.magazine-viewport').zoom('zoomOut');
+                        break;
+                    case esc:
 
-        });
+                        $('.flipbook-viewport').zoom('zoomOut');
+                        e.preventDefault();
 
-        yepnope({
-            test: Modernizr.csstransforms,
-            yep: ['../../lib/turn.min.js'],
-            nope: ['../../lib/turn.html4.min.js', 'css/jquery.ui.html4.css'],
-            both: ['../../lib/zoom.min.js', '../../lib/scissor.min.js', 'css/double-page.css', 'css/jquery.ui.css', 'js/magazine.js', 'css/magazine.css'],
-            complete: loadApp
-        });
+                        break;
+                }
+            });
+
+            $('.zoom-icon').bind('mouseover', function() {
+
+                if ($(this).hasClass('zoom-icon-in'))
+                    $(this).addClass('zoom-icon-in-hover');
+
+                if ($(this).hasClass('zoom-icon-out'))
+                    $(this).addClass('zoom-icon-out-hover');
+
+            }).bind('mouseout', function() {
+
+                if ($(this).hasClass('zoom-icon-in'))
+                    $(this).removeClass('zoom-icon-in-hover');
+
+                if ($(this).hasClass('zoom-icon-out'))
+                    $(this).removeClass('zoom-icon-out-hover');
+
+            }).bind('click', function() {
+
+                if ($(this).hasClass('zoom-icon-in'))
+                    $('.magazine-viewport').zoom('zoomIn');
+                else if ($(this).hasClass('zoom-icon-out'))
+                    $('.magazine-viewport').zoom('zoomOut');
+
+            });
+
+            yepnope({
+                test: Modernizr.csstransforms,
+                yep: ['../../lib/turn.min.js'],
+                nope: ['../../lib/turn.html4.min.js', 'css/jquery.ui.html4.css'],
+                both: ['../../lib/zoom.min.js', '../../lib/scissor.min.js', 'css/double-page.css', 'css/jquery.ui.css', 'js/magazine.js', 'css/magazine.css'],
+                complete: loadApp
+            });
     </script>
 
 </body>
